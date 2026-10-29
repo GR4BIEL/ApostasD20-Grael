@@ -1,0 +1,386 @@
+/* ============================================================
+   ApostasD20 · css/style.css
+   Só aparência. Para mudar cores, mexa na seção 1 (TEMA).
+   ============================================================ */
+
+/* ---------- 1. TEMA: cores (claro e escuro) usadas em todo o site ---------- */
+:root {
+  --bg:#e4e9ec;
+  --panel:#f6f8f9;
+  --ink:#1b1a2e;
+  --mute:#5c6070;
+  --felt:#1f6b5c;
+  --felt2:#17554a;
+  --brass:#c9973a;
+  --line:#c5ccd3;
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px)
+}
+@media (prefers-color-scheme:dark) {
+  :root:not([data-theme="light"]) {
+    --bg:#181730;
+    --panel:#232142;
+    --ink:#ece8dc;
+    --mute:#a4a1bd;
+    --felt:#0f4c43;
+    --felt2:#0b3a33;
+    --brass:#d6a842;
+    --line:#37345c;
+    color-scheme:dark
+  }
+}
+:root[data-theme="dark"] {
+  --bg:#181730;
+  --panel:#232142;
+  --ink:#ece8dc;
+  --mute:#a4a1bd;
+  --felt:#0f4c43;
+  --felt2:#0b3a33;
+  --brass:#d6a842;
+  --line:#37345c;
+  color-scheme:dark
+}
+
+/* ---------- 2. BASE: reset, corpo da página, títulos ---------- */
+html {
+  scroll-padding-top:env(safe-area-inset-top,0px)
+}
+* {
+  box-sizing:border-box
+}
+body {
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font:15px/1.5 "Instrument Sans",system-ui,sans-serif
+}
+header,main {
+  max-width:1180px;
+  margin:auto;
+  padding:16px 20px 0
+}
+main {
+  padding-bottom:32px
+}
+h1 {
+  font:700 28px/1.1 Fraunces,Georgia,serif;
+  margin:0 0 12px
+}
+h2 {
+  font:700 17px/1.2 Fraunces,Georgia,serif;
+  margin:0 0 10px
+}
+p {
+  margin:0 0 8px
+}
+
+/* ---------- 3. ABAS dos jogos (21, Pôquer...) ---------- */
+#tabs {
+  display:flex;
+  gap:4px;
+  overflow-x:auto;
+  border-bottom:1px solid var(--line)
+}
+#tabs button {
+  background:none;
+  border:0;
+  border-bottom:3px solid transparent;
+  padding:10px 14px;
+  font:600 15px "Instrument Sans",sans-serif;
+  color:var(--mute);
+  cursor:pointer;
+  white-space:nowrap
+}
+#tabs button[aria-selected=true] {
+  color:var(--ink);
+  border-color:var(--brass)
+}
+#tabs small {
+  font-weight:400
+}
+
+/* ---------- 4. LAYOUT: grade principal e painéis ---------- */
+.wrap {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 340px;
+  gap:16px;
+  align-items:start
+}
+@media (max-width:860px) {
+  .wrap {
+    grid-template-columns:1fr
+  }
+}
+.panel {
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:14px;
+  margin-bottom:14px
+}
+section .panel {
+  margin:14px 0 0
+}
+
+/* ---------- 5. MESA: feltro, banca, cadeiras dos jogadores ---------- */
+.felt {
+  background:radial-gradient(ellipse at 50% 0,var(--felt),var(--felt2));
+  color:#f1efe6;
+  border:8px solid #4a3220;
+  border-radius:22px;
+  padding:16px;
+  min-height:300px
+}
+.dealer {
+  text-align:center;
+  margin-bottom:16px
+}
+.dealer .hand,.dealer .info,.dealer .sh,.dealer .ops {
+  justify-content:center
+}
+.seats {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(210px,1fr));
+  gap:12px
+}
+.seat {
+  background:rgba(0,0,0,.25);
+  border-radius:12px;
+  padding:10px;
+  display:flex;
+  flex-direction:column;
+  gap:8px
+}
+.seat.on {
+  outline:3px solid var(--brass)
+}
+.sh {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  font:700 17px Fraunces,Georgia,serif
+}
+.hand {
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+  min-height:60px;
+  align-items:center
+}
+.info {
+  display:flex;
+  gap:10px;
+  align-items:baseline
+}
+.tot {
+  font:700 26px/1 Fraunces,Georgia,serif;
+  min-width:1ch
+}
+.felt input,.felt select {
+  background:rgba(255,255,255,.12);
+  color:inherit;
+  border:1px solid rgba(255,255,255,.3);
+  border-radius:6px;
+  padding:5px 8px;
+  font:inherit;
+  min-width:0
+}
+.felt select option {
+  color:#1b1a2e;
+  background:#f6f8f9
+}
+.felt input::placeholder {
+  color:rgba(241,239,230,.65)
+}
+.felt input[type=number] {
+  width:88px
+}
+.note {
+  width:100%
+}
+.mute {
+  opacity:.7
+}
+
+/* ---------- 6. LINHAS DE AÇÕES e cabeçalho do diário ---------- */
+.ops {
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+  align-items:center
+}
+.ops .btn {
+  padding:5px 9px;
+  min-height:32px;
+  font-size:13px
+}
+.ops label {
+  display:flex;
+  gap:4px;
+  align-items:center;
+  font-size:13px
+}
+.lh {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-bottom:6px
+}
+.lh h2 {
+  margin:0
+}
+
+/* ---------- 7. CARTAS (frente, verso escondido, visível só ao mestre) ---------- */
+.card {
+  width:42px;
+  height:60px;
+  border-radius:5px;
+  background:#f3ead3;
+  color:#1b1a2e;
+  display:grid;
+  place-items:center;
+  font:700 22px/1 Fraunces,Georgia,serif;
+  box-shadow:0 1px 0 rgba(0,0,0,.3)
+}
+.card.hid {
+  background:repeating-linear-gradient(45deg,#8c2f39 0 5px,#5b1b24 5px 10px)
+}
+.card.secret {
+  outline:2px dashed var(--brass);
+  outline-offset:1px
+}
+
+/* ---------- 8. BOTÕES ---------- */
+.btn {
+  font:600 14px "Instrument Sans",sans-serif;
+  padding:9px 14px;
+  min-height:40px;
+  border-radius:8px;
+  border:1px solid var(--line);
+  background:var(--panel);
+  color:var(--ink);
+  cursor:pointer
+}
+.btn.pri {
+  background:var(--brass);
+  border-color:var(--brass);
+  color:#1b1a2e
+}
+.btn:disabled {
+  opacity:.5;
+  cursor:default
+}
+.x {
+  background:none;
+  border:0;
+  color:inherit;
+  font-size:22px;
+  line-height:1;
+  cursor:pointer;
+  opacity:.75
+}
+
+/* ---------- 9. ACESSIBILIDADE: foco do teclado ---------- */
+:focus-visible {
+  outline:3px solid var(--brass);
+  outline-offset:2px
+}
+
+/* ---------- 10. FORMULÁRIOS: campos, seletores, caixas de marcação ---------- */
+.row {
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  align-items:center;
+  margin-top:8px
+}
+.panel input[type=text],.panel input[type=password],.panel input[type=number],.panel select,.panel input:not([type]) {
+  background:var(--bg);
+  color:var(--ink);
+  border:1px solid var(--line);
+  border-radius:8px;
+  padding:8px 10px;
+  font:inherit;
+  min-width:0
+}
+#add input,#jn {
+  flex:1 1 140px
+}
+#mv,#rv {
+  width:70px
+}
+.seg {
+  display:flex;
+  gap:6px
+}
+.seg button {
+  flex:1
+}
+.seg button[aria-pressed=true] {
+  background:var(--brass);
+  border-color:var(--brass);
+  color:#1b1a2e
+}
+.chk {
+  display:flex;
+  gap:8px;
+  align-items:center;
+  margin-top:10px;
+  font-size:14px
+}
+.chk input[type=checkbox] {
+  flex:none
+}
+
+/* ---------- 11. TEXTO DE STATUS ("Vez de...") ---------- */
+.now {
+  font:700 20px Fraunces,Georgia,serif
+}
+
+/* ---------- 12. DIÁRIO DA MESA e regras ---------- */
+#log {
+  overflow:auto;
+  margin:6px 0
+}
+#log p {
+  margin:0 0 3px;
+  color:var(--mute);
+  font-size:13px;
+  line-height:1.35
+}
+details {
+  font-size:14px;
+  color:var(--mute)
+}
+
+/* ---------- 13. VISIBILIDADE POR PAPEL (mestre / mesa / jogador / audiência) ---------- */
+body:not(.r-gm) .gm {
+  display:none
+}
+body.r-player .gmo,body.r-audience .gmo {
+  display:none
+}
+
+/* ---------- 14. TELAS DE ENTRADA ---------- */
+.lab {
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  font-size:14px;
+  flex:1 1 100%
+}
+.lab input {
+  width:100%
+}
+
+.tela-entrada {
+  max-width: 520px;
+  margin: 20px auto;
+}
+.tela-msg {
+  margin-top: 10px;
+}
