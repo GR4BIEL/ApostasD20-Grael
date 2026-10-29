@@ -2,59 +2,105 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<title>ApostasD20</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ApostasD20</title>
+
 <!-- Biblioteca de conexão online (PeerJS) -->
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+
+<!-- Fontes do Google -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700&family=Instrument+Sans:wght@400;600&display=swap" rel="stylesheet">
-<!-- Aparência -->
+
+<!-- Aparência / CSS -->
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
 <!-- ===== CORPO DA PÁGINA ===== -->
 <header>
-<h1>ApostasD20</h1>
-<nav id="tabs" role="tablist" aria-label="Jogos"></nav>
+  <h1>ApostasD20</h1>
+  <nav id="tabs" role="tablist" aria-label="Jogos" style="display:none;"></nav>
 </header>
+
 <main id="game"></main>
 
 <!-- ===== MODELOS DE TELA (HTML) =====
      Não aparecem sozinhos: o JavaScript copia o modelo para dentro de <main id="game">. -->
 <template id="tpl-mesa21">
-<div class="wrap"><section><div class="felt" id="table"></div><div class="panel" id="ctrl"></div></section>
-<aside>
-<div class="panel gmo"><h2>Mesa</h2><div id="opts"></div>
-<form id="add" class="row gm"><input name="n" placeholder="Nome do NPC" aria-label="Nome do NPC" maxlength="24" required><button class="btn">Adicionar NPC</button></form>
-<div class="gm" id="lk" style="margin-top:10px"></div></div>
-<div class="panel"><div class="lh"><h2>Diário da mesa</h2><div class="ops"><button class="btn" id="lx" data-a="logx">Ver mais</button><button class="btn" data-a="copy">Copiar</button><button class="btn gm" data-a="clear">Limpar</button></div></div><div id="log"></div><span id="msg" role="status"></span></div>
-<details><summary>Regras desta mesa</summary><p>Cada jogador recebe 2d10 em sigilo e pede ou não +1d10 até chegar ao limite da mesa (21 por padrão, o mestre pode mudar) ou estourar. Com a banca ativa, ela joga por último: vence quem chegar mais perto do limite sem passar; empate devolve a aposta. Sem banca, cada um aposta no pote e quem chegar mais perto do limite sem passar leva tudo (empate divide). A audiência vê só uma carta de cada mão.</p></details>
-</aside></div>
+  <div class="wrap">
+    <section>
+      <div class="felt" id="table"></div>
+      <div class="panel" id="ctrl"></div>
+    </section>
+    <aside>
+      <div class="panel gmo">
+        <h2>Mesa</h2>
+        <div id="opts"></div>
+        <form id="add" class="row gm">
+          <input name="n" placeholder="Nome do NPC" aria-label="Nome do NPC" maxlength="24" required>
+          <button class="btn">Adicionar NPC</button>
+        </form>
+        <div class="gm" id="lk" style="margin-top:10px"></div>
+      </div>
+      <div class="panel">
+        <div class="lh">
+          <h2>Diário da mesa</h2>
+          <div class="ops">
+            <button class="btn" id="lx" data-a="logx">Ver mais</button>
+            <button class="btn" data-a="copy">Copiar</button>
+            <button class="btn gm" data-a="clear">Limpar</button>
+          </div>
+        </div>
+        <div id="log"></div>
+        <span id="msg" role="status"></span>
+      </div>
+      <details>
+        <summary>Regras desta mesa</summary>
+        <p>Cada jogador recebe 2d10 em sigilo e pede ou não +1d10 até chegar ao limite da mesa (21 por padrão, o mestre pode mudar) ou estourar. Com a banca ativa, ela joga por último: vence quem chegar mais perto do limite sem passar; empate devolve a aposta. Sem banca, cada um aposta no pote e quem chegar mais perto do limite sem passar leva tudo (empate divide). A audiência vê só uma carta de cada mão.</p>
+      </details>
+    </aside>
+  </div>
 </template>
 
 <template id="tpl-menu">
-<h2>ApostasD20</h2><p class="mute">Mesas de apostas para jogar com o seu grupo, online.</p><div class="row"><button class="btn pri" data-a="L" data-i="mk">Criar mesa</button><button class="btn" data-a="L" data-i="join">Ingressar numa mesa</button></div>
+  <h2>ApostasD20</h2>
+  <p class="mute">Mesas de apostas para jogar com o seu grupo, online.</p>
+  <div class="row">
+    <button class="btn pri" data-a="L" data-i="mk">Criar mesa</button>
+    <button class="btn" data-a="L" data-i="join">Ingressar numa mesa</button>
+  </div>
 </template>
 
 <template id="tpl-mk">
-<h2>Criar mesa</h2><p>Você será o mestre. Defina o código da sala e, se quiser uma mesa privada, uma senha.</p>
-<div class="row"><label class="lab">Código da sala <input id="mc" maxlength="20" autocomplete="off"></label></div>
-<div class="row"><label class="lab">Senha (opcional, deixe vazio para mesa pública) <input id="mp" type="password" maxlength="40" autocomplete="off"></label></div>
-<label class="chk"><input type="checkbox" id="mf"> Começar do zero (apaga a mesa salva com esse código neste navegador)</label>
-<div class="row"><button class="btn pri" data-a="L" data-i="create">Criar mesa</button></div><div class="row"><button class="btn" data-a="L" data-i="menu">Voltar</button></div>
+  <h2>Criar mesa</h2>
+  <p>Você será o mestre. Defina o código da sala e, se quiser uma mesa privada, uma senha.</p>
+  <div class="row"><label class="lab">Código da sala <input id="mc" maxlength="20" autocomplete="off"></label></div>
+  <div class="row"><label class="lab">Senha (opcional, deixe vazio para mesa pública) <input id="mp" type="password" maxlength="40" autocomplete="off"></label></div>
+  <label class="chk"><input type="checkbox" id="mf"> Começar do zero (apaga a mesa salva com esse código neste navegador)</label>
+  <div class="row"><button class="btn pri" data-a="L" data-i="create">Criar mesa</button></div>
+  <div class="row"><button class="btn" data-a="L" data-i="menu">Voltar</button></div>
 </template>
 
 <template id="tpl-join">
-<h2>Ingressar numa mesa</h2><p>Digite o código que o mestre passou. Se a mesa for privada, digite também a senha.</p>
-<div class="row"><label class="lab">Código da sala <input id="jc" maxlength="20" autocomplete="off"></label></div>
-<div class="row"><label class="lab">Senha (se houver) <input id="jp" type="password" maxlength="40" autocomplete="off"></label></div>
-<div class="row"><button class="btn pri" id="jb" data-a="L" data-i="check">Continuar</button></div><div class="row"><button class="btn" data-a="L" data-i="menu">Voltar</button></div>
+  <h2>Ingressar numa mesa</h2>
+  <p>Digite o código que o mestre passou. Se a mesa for privada, digite também a senha.</p>
+  <div class="row"><label class="lab">Código da sala <input id="jc" maxlength="20" autocomplete="off"></label></div>
+  <div class="row"><label class="lab">Senha (se houver) <input id="jp" type="password" maxlength="40" autocomplete="off"></label></div>
+  <div class="row"><button class="btn pri" id="jb" data-a="L" data-i="check">Continuar</button></div>
+  <div class="row"><button class="btn" data-a="L" data-i="menu">Voltar</button></div>
 </template>
 
 <template id="tpl-who">
-<h2>Mesa <span id="qcode"></span></h2><p>Como você quer participar?</p>
-<div class="row"><input id="pn" placeholder="Nome do seu personagem" aria-label="Nome do seu personagem" maxlength="24"><button class="btn pri" data-a="L" data-i="player">Entrar como jogador</button></div>
-<div class="row"><button class="btn" data-a="L" data-i="audience">Só assistir (audiência)</button></div><div class="row"><button class="btn" data-a="L" data-i="menu">Voltar</button></div>
+  <h2>Mesa <span id="qcode"></span></h2>
+  <p>Como você quer participar?</p>
+  <div class="row">
+    <input id="pn" placeholder="Nome do seu personagem" aria-label="Nome do seu personagem" maxlength="24">
+    <button class="btn pri" data-a="L" data-i="player">Entrar como jogador</button>
+  </div>
+  <div class="row"><button class="btn" data-a="L" data-i="audience">Só assistir (audiência)</button></div>
+  <div class="row"><button class="btn" data-a="L" data-i="menu">Voltar</button></div>
 </template>
 
 <!-- ===== JAVASCRIPT (a ordem importa) ===== -->
