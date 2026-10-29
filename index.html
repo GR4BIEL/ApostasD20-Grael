@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>ApostasD20</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700&family=Instrument+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#e4e9ec;--panel:#f6f8f9;--ink:#1b1a2e;--mute:#5c6070;--felt:#1f6b5c;--felt2:#17554a;--brass:#c9973a;--line:#c5ccd3;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#181730;--panel:#232142;--ink:#ece8dc;--mute:#a4a1bd;--felt:#0f4c43;--felt2:#0b3a33;--brass:#d6a842;--line:#37345c;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#181730;--panel:#232142;--ink:#ece8dc;--mute:#a4a1bd;--felt:#0f4c43;--felt2:#0b3a33;--brass:#d6a842;--line:#37345c;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "Instrument Sans",system-ui,sans-serif}
+header,main{max-width:1180px;margin:auto;padding:16px 20px 0}
+main{padding-bottom:32px}
+h1{font:700 28px/1.1 Fraunces,Georgia,serif;margin:0 0 12px}
+h2{font:700 17px/1.2 Fraunces,Georgia,serif;margin:0 0 10px}
+p{margin:0 0 8px}
+#tabs{display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid var(--line)}
+#tabs button{background:none;border:0;border-bottom:3px solid transparent;padding:10px 14px;font:600 15px "Instrument Sans",sans-serif;color:var(--mute);cursor:pointer;white-space:nowrap}
+#tabs button[aria-selected=true]{color:var(--ink);border-color:var(--brass)}
+#tabs small{font-weight:400}
+.wrap{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px;align-items:start}
+@media (max-width:860px){.wrap{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:14px}
+section .panel{margin:14px 0 0}
+.felt{background:radial-gradient(ellipse at 50% 0,var(--felt),var(--felt2));color:#f1efe6;border:8px solid #4a3220;border-radius:22px;padding:16px;min-height:300px}
+.dealer{text-align:center;margin-bottom:16px}
+.dealer .hand,.dealer .info,.dealer .sh,.dealer .ops{justify-content:center}
+.seats{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
+.seat{background:rgba(0,0,0,.25);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:8px}
+.seat.on{outline:3px solid var(--brass)}
+.sh{display:flex;justify-content:space-between;align-items:center;font:700 17px Fraunces,Georgia,serif}
+.hand{display:flex;gap:6px;flex-wrap:wrap;min-height:60px;align-items:center}
+.info{display:flex;gap:10px;align-items:baseline}
+.tot{font:700 26px/1 Fraunces,Georgia,serif;min-width:1ch}
+.felt input,.felt select{background:rgba(255,255,255,.12);color:inherit;border:1px solid rgba(255,255,255,.3);border-radius:6px;padding:5px 8px;font:inherit;min-width:0}
+.felt select option{color:#1b1a2e;background:#f6f8f9}
+.felt input::placeholder{color:rgba(241,239,230,.65)}
+.felt input[type=number]{width:88px}
+.note{width:100%}
+.mute{opacity:.7}
+.ops{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.ops .btn{padding:5px 9px;min-height:32px;font-size:13px}
+.ops label{display:flex;gap:4px;align-items:center;font-size:13px}
+.lh{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px}.lh h2{margin:0}
+.card{width:42px;height:60px;border-radius:5px;background:#f3ead3;color:#1b1a2e;display:grid;place-items:center;font:700 22px/1 Fraunces,Georgia,serif;box-shadow:0 1px 0 rgba(0,0,0,.3)}
+.card.hid{background:repeating-linear-gradient(45deg,#8c2f39 0 5px,#5b1b24 5px 10px)}
+.card.secret{outline:2px dashed var(--brass);outline-offset:1px}
+.btn{font:600 14px "Instrument Sans",sans-serif;padding:9px 14px;min-height:40px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
+.btn.pri{background:var(--brass);border-color:var(--brass);color:#1b1a2e}
+.btn:disabled{opacity:.5;cursor:default}
+.x{background:none;border:0;color:inherit;font-size:22px;line-height:1;cursor:pointer;opacity:.75}
+:focus-visible{outline:3px solid var(--brass);outline-offset:2px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px}
+.panel input[type=text],.panel input[type=password],.panel input[type=number],.panel select,.panel input:not([type]){background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:inherit;min-width:0}
+#add input,#jn{flex:1 1 140px}
+#mv,#rv{width:70px}
+.seg{display:flex;gap:6px}
+.seg button{flex:1}
+.seg button[aria-pressed=true]{background:var(--brass);border-color:var(--brass);color:#1b1a2e}
+.chk{display:flex;gap:8px;align-items:center;margin-top:10px;font-size:14px}.chk input[type=checkbox]{flex:none}
+.now{font:700 20px Fraunces,Georgia,serif}
+#log{overflow:auto;margin:6px 0}
+#log p{margin:0 0 3px;color:var(--mute);font-size:13px;line-height:1.35}
+details{font-size:14px;color:var(--mute)}
+body:not(.r-gm) .gm{display:none}
+body.r-player .gmo,body.r-audience .gmo{display:none}
+.lab{display:flex;flex-direction:column;gap:4px;font-size:14px;flex:1 1 100%}.lab input{width:100%}
+</style>
+</head>
+<body>
+<header>
+<h1>ApostasD20</h1>
+<nav id="tabs" role="tablist" aria-label="Jogos"></nav>
+</header>
+<main id="game"></main>
+<script>
+(()=>{
+const $=s=>document.querySelector(s),d10=()=>1+Math.floor(Math.random()*10),sum=c=>c.reduce((a,b)=>a+b,0);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const K='mesa/21';
+let S={passw:'',max:21,coin:'Ouro',sigilo:true,banca:true,cru:'',dist:'',acc:'',auto:true,over:'',secret:[],phase:'setup',turn:0,players:[],dealer:{cards:[],st:'wait'},log:[],seen:{}};
+let TAB='21',VIEW='gm',isGM=false,db=null,room=null,user=null,uid=null,MYROLE='',MYNAME='',MYPW='',MYFRESH=false,HID='',code='',occ=false,ready=false,loaded=false,LOGX=false,PEEK=false,pt=null,timer=null,reqN=Date.now()*1000;
+const role=()=>isGM?VIEW:(MYROLE==='audience'?'audience':'player');
+const tg=t=>t==='d'?S.dealer:S.players[t];
+const lg=t=>S.log.unshift(t),sec=t=>{S.secret=[t,...(S.secret||[])].slice(0,10)};
+const msg=t=>{const m=$('#msg');if(!m)return;m.textContent=t;setTimeout(()=>{m.textContent=''},3500)};
+
+/* Registro de jogos: para criar uma aba nova, adicione { id, name, build } (ou soon). */
+const GAMES=[
+{id:'21',name:'21',build:build21},
+{id:'poker',name:'Pôquer',soon:'Cartas comunitárias, rodadas de aposta e blefe.'},
+{id:'dados',name:'Dados de mentiroso',soon:'Copos, lances e o clássico “mentiroso!”.'}];
+
+function show(){
+ $('#tabs').innerHTML=GAMES.map(g=>`<button role="tab" aria-selected="${g.id===TAB}" data-a="tab" data-i="${g.id}">${g.name}${g.soon?' <small>(em breve)</small>':''}</button>`).join('');
+ const g=GAMES.find(g=>g.id===TAB)||GAMES[0];
+ if(g.build){g.build();render()}
+ else $('#game').innerHTML=`<div class="panel"><h2>${g.name}</h2><p>${g.soon}</p><p>Este jogo ainda não tem regras. Jogadores, fichas e conexão online já são compartilhados entre as abas.</p></div>`}
+
+function build21(){
+$('#game').innerHTML=`<div class="wrap"><section><div class="felt" id="table"></div><div class="panel" id="ctrl"></div></section>
+<aside>
+<div class="panel gmo"><h2>Mesa</h2><div id="opts"></div>
+<form id="add" class="row gm"><input name="n" placeholder="Nome do NPC" aria-label="Nome do NPC" maxlength="24" required><button class="btn">Adicionar NPC</button></form>
+<div class="gm" id="lk" style="margin-top:10px"></div></div>
+<div class="panel"><div class="lh"><h2>Diário da mesa</h2><div class="ops"><button class="btn" id="lx" data-a="logx">Ver mais</button><button class="btn" data-a="copy">Copiar</button><button class="btn gm" data-a="clear">Limpar</button></div></div><div id="log"></div><span id="msg" role="status"></span></div>
+<details><summary>Regras desta mesa</summary><p>Cada jogador recebe 2d10 em sigilo e pede ou não +1d10 até chegar ao limite da mesa (21 por padrão, o mestre pode mudar) ou estourar. Com a banca ativa, ela joga por último: vence quem chegar mais perto do limite sem passar; empate devolve a aposta. Sem banca, cada um aposta no pote e quem chegar mais perto do limite sem passar leva tudo (empate divide). A audiência vê só uma carta de cada mão.</p></details>
+</aside></div>`}
+
+function render(){
+if(TAB!=='21')return;
+if(!ready){$('#table').innerHTML='<p>Conectando à mesa…</p>';$('#ctrl').innerHTML='';return}
+const R=role(),P=S.players,D=S.dealer,rv=S.phase==='reveal';
+document.body.className='r-'+R;
+if(!isGM&&!loaded){$('#table').innerHTML='<p>Aguardando o mestre abrir a mesa…</p>';$('#ctrl').innerHTML='';return}
+const me=P.findIndex(p=>p.uid&&p.uid===uid),inRound=['turn','dealer'].includes(S.phase);
+const pubv=(d,i)=>rv||!(S.sigilo||(d&&i===1&&S.phase!=='dealer'));
+const seeX=(x,i,d)=>R==='gm'||x.show||pubv(d,i)||(R==='audience'&&i===0)||(R==='player'&&PEEK&&x.uid&&x.uid===uid);
+const card=(x,v,i,d)=>{const s=seeX(x,i,d),pub=x.show||pubv(d,i);return`<div class="card${s?(R==='gm'&&!pub?' secret':''):' hid'}"><b>${s?v:''}</b></div>`};
+const hand=(x,d)=>({html:x.cards.map((v,i)=>card(x,v,i,d)).join(''),tot:!x.cards.length?'':x.cards.every((_,i)=>seeX(x,i,d))?sum(x.cards):'?'});
+const lab=(x,d,act)=>{
+ if(rv&&!d)return{win:'Venceu',lose:'Perdeu',push:S.banca?'Empate':'Devolvido'}[x.res]||'';
+ if(x.st==='play')return d?(S.phase==='dealer'?'Jogando':'Aguardando'):act?'Jogando':'Aguardando';
+ if(['stand','bust','21'].includes(x.st))return(!rv&&!x.cards.every((_,i)=>seeX(x,i,d)))?'Terminou':(x.st==='stand'?'Parou':x.st==='bust'?'Estourou':'Fez '+S.max);
+ return''};
+const ops=t=>`<div class="ops"><select data-s="g${t}" aria-label="Valor da carta"><option value="">Sorteio</option>${Array.from({length:10},(_,n)=>`<option>${n+1}</option>`).join('')}</select><button class="btn" data-a="give" data-i="${t}">Dar carta</button><button class="btn" data-a="take" data-i="${t}">Tirar última</button><button class="btn" data-a="show" data-i="${t}">${tg(t).show?'Esconder':'Mostrar à mesa'}</button></div>`;
+const ed=S.phase==='setup'||rv;
+const seat=(p,i)=>{const act=S.phase==='turn'&&S.turn===i,h=hand(p,false),own=R==='player'&&p.uid===uid;
+ return`<div class="seat${act?' on':''}"><div class="sh"><span>${esc(p.name)}${own?' (você)':''}${p.npc?' <small class="mute">NPC</small>':''}${S.acc===p.id?' <small>(acusado)</small>':''}</span>${R==='gm'&&ed?`<button class="x" data-a="del" data-i="${i}" aria-label="Remover ${esc(p.name)}">×</button>`:''}</div>
+${p.out?'<div class="hand mute">Crupiê da mesa</div>':`<div class="hand">${h.html||'<span class="mute">sem cartas</span>'}</div><div class="info"><span class="tot">${h.tot}</span><span>${lab(p,false,act)}</span></div>`}
+<div>${esc(S.coin)} ${p.claim!=null?p.claim:p.chips}${R==='gm'&&p.claim!=null?` <small class="mute">(de fato ${p.chips})</small>`:''}</div>${R==='gm'?`<div class="ops"><label>${esc(S.coin)} <input type="number" min="0" value="${p.chips}" data-f="chips" data-i="${i}"></label><label>Diz ter <input type="number" min="0" value="${p.claim!=null?p.claim:''}" placeholder="igual" data-f="claim" data-i="${i}"></label></div>`:''}
+${p.out?'':`<div>Aposta ${R==='gm'&&ed?`<input type="number" min="1" value="${p.bet}" data-f="bet" data-i="${i}" aria-label="Aposta de ${esc(p.name)}">`:p.bet}${p.item?' + <em>'+esc(p.item)+'</em>':''}</div>`}${own&&!p.out?`<div class="ops"><input id="rv" type="number" min="0" value="10" aria-label="Valor da aposta"><input id="ri" type="text" placeholder="Item (opcional)" maxlength="60" aria-label="Item apostado" style="flex:1 1 100px"><button class="btn" data-a="raise" ${S.phase==='setup'||act?'':'disabled'}>Aumentar aposta</button></div>${S.phase==='setup'||act?'':'<small class="mute">Dá para aumentar antes da distribuição e na sua vez.</small>'}`:''}
+${R==='gm'?`${!p.out&&S.phase==='turn'?`<div class="ops"><input type="number" min="1" value="10" data-s="r${i}" aria-label="Valor a aumentar"><button class="btn" data-a="raise" data-i="${i}">Aumentar aposta</button></div>`:''}${!p.out&&inRound?ops(i):''}<input class="note" placeholder="Anotação secreta do mestre" value="${esc(p.note||'')}" data-f="note" data-i="${i}" aria-label="Anotação sobre ${esc(p.name)}">${p.cheat?`<small>Trapaças: ${p.cheat}</small>`:''}<div class="ops"><button class="btn" data-a="acuse" data-i="${i}">${S.acc===p.id?'Retirar acusação':'Acusar de trapaça'}</button></div>${S.phase==='turn'&&p.st==='play'&&!act?`<button class="btn" data-a="turn" data-i="${i}">Dar a vez</button>`:''}`:''}</div>`};
+const dh=hand(D,true),cn=(P.find(p=>p.id===S.cru)||{}).name;
+$('#table').innerHTML=(S.banca?`<div class="dealer"><div class="sh" style="justify-content:center"><span>Banca${cn?' (crupiê: '+esc(cn)+')':''}</span></div><div class="hand">${dh.html||'<span class="mute">sem cartas</span>'}</div><div class="info" style="justify-content:center"><span class="tot">${dh.tot}</span><span>${lab(D,true)}</span></div>${R==='gm'&&inRound?ops('d'):''}</div>`:'<p style="text-align:center">Sem banca: jogador contra jogador.</p>')+`<div class="seats">${P.map(seat).join('')||'<p>Nenhum jogador. Sente alguém à mesa para começar.</p>'}</div>`;
+
+let c='';
+if(R==='mesa'){}else if(R==='player'){
+ const p=P[me],mine=S.phase==='turn'&&me>=0&&S.turn===me;
+ if(me<0)c=`<p class="now">Sente-se à mesa</p><p>Escreva o nome do seu personagem.${ed?'':' Você joga a partir da próxima rodada.'}</p><div class="row"><input id="jn" placeholder="Nome do personagem" aria-label="Nome do personagem" maxlength="24"><button class="btn pri" data-a="join">Sentar à mesa</button></div>`;
+ else{
+  c=`<p class="now">${p.out?'Você é o crupiê':mine?'É a sua vez':S.phase==='dealer'?'Vez da banca':rv?'Rodada encerrada':S.phase==='setup'?'Aguardando o mestre distribuir':'Aguarde a sua vez'}</p>`;
+  if(!p.out)c+=`<div class="row"><button class="btn pri" data-a="hit" ${mine?'':'disabled'}>Pedir +1d10</button><button class="btn" data-a="stand" ${mine?'':'disabled'}>Parar</button></div>`;
+  else c+=`<div class="row"><button class="btn pri" data-a="dhit" ${S.phase==='dealer'?'':'disabled'}>Banca pede +1d10</button><button class="btn" data-a="dstand" ${S.phase==='dealer'?'':'disabled'}>Banca para</button></div>`;
+  if(!p.out){const s=p.steal&&p.steal.st;
+   c+=!s?`<div class="row"><button class="btn" data-a="steal" ${inRound&&p.cards.length?'':'disabled'}>Roubar (avisar o mestre)</button><small class="mute">Fale com o mestre antes de trapacear.</small></div>`
+   :s==='ask'?'<p class="mute">Você avisou o mestre. Aguarde ele definir o desafio.</p>'
+   :s==='dc'?`<div class="row"><label>Resultado do D20 (Roll20) <input id="d20" type="number" min="1" max="20"></label><button class="btn" data-a="d20">Informar ao mestre</button></div>`
+   :'<p class="mute">Resultado enviado. O mestre decide se ninguém percebeu.</p>'}
+  c+=`${p.cards.length&&S.sigilo&&!rv&&!p.out?`<div class="row"><button class="btn" data-a="peek">${PEEK?'Escondendo em instantes…':'Espiar minhas cartas (4 s)'}</button><small class="mute">Só você vê.</small></div>`:''}<div class="row"><label>Seu nome <input id="nm" value="${esc(p.name)}" maxlength="24"></label><button class="btn" data-a="rename">Salvar nome</button></div>`}
+}else if(R==='audience'){c='<p class="now">Você está assistindo</p><p class="mute">Você vê a mesa como os jogadores, sem agir.</p>'}else{
+ if(S.phase==='setup')c=`<p>Defina as apostas nas cadeiras. Cada jogador recebe 2d10 ao distribuir.</p><button class="btn pri" data-a="deal" ${P.some(p=>!p.out)?'':'disabled'}>Distribuir 2d10</button>`;
+ else if(inRound){const d=S.phase==='dealer';
+  c=`<p class="now">${d?'Vez da banca':'Vez de '+esc((P[S.turn]||{}).name||'')}</p><div class="row"><button class="btn pri" data-a="hit">Pedir +1d10</button><button class="btn" data-a="stand">Parar</button></div>
+<div class="row"><label>Valor rolado no Roll20 <input id="mv" type="number" min="1" max="10"></label><button class="btn" data-a="manual">Somar valor</button></div>`}
+ else c=`<p>Rodada encerrada. Tudo acertado (${esc(S.coin)}).${S.auto?' Uma nova rodada começa sozinha em instantes.':''}</p><button class="btn pri" data-a="again">Nova rodada</button>`;
+}
+const stealH=R!=='gm'?'':P.map((p,i)=>{const s=p.steal;if(!s)return'';
+ const h=s.st==='ask'?`<div class="row"><b>${esc(p.name)}</b> quer roubar. Desafio (CD) <input type="number" min="1" max="30" value="12" data-s="dc${i}" aria-label="CD"><button class="btn pri" data-a="sdc" data-i="${i}">Definir</button><button class="btn" data-a="sno" data-i="${i}">Negar</button></div>`
+ :s.st==='dc'?`<p><b>${esc(p.name)}</b>: CD ${s.dc}. Aguardando o D20 dele.</p>`
+ :`<p><b>${esc(p.name)}</b> tirou ${s.d20} contra CD ${s.dc}: ${s.d20>=s.dc?'sucesso':'falha'}.</p><div class="row"><button class="btn pri" data-a="sok" data-i="${i}">Funcionou: garantir ${S.max-1} ou ${S.max}</button><button class="btn" data-a="sfail" data-i="${i}">Falhou</button><button class="btn" data-a="scatch" data-i="${i}">Pego!</button></div>`;
+ return`<div class="panel" style="margin:0 0 10px;background:var(--bg)">${h}</div>`}).join(''),
+ac=P.find(p=>p.id===S.acc),ov=`<p class="now">Jogo encerrado</p><p>${esc(S.over||'')}</p>${R==='gm'?'<button class="btn pri" data-a="newgame">Nova partida</button>':''}`;
+$('#ctrl').innerHTML=(ac&&S.phase!=='over'?`<p class="now">${esc(ac.name)} foi acusado de trapaça. Justifique-se!</p>${R==='gm'?'<div class="row"><button class="btn" data-a="pardon">Aceitar justificativa</button><button class="btn pri" data-a="end">Encerrar o jogo</button></div>':''}`:'')+stealH+(S.phase==='over'?ov:c)+(R==='gm'&&S.secret&&S.secret.length?`<details open><summary>Trapaças (só o mestre vê)</summary>${S.secret.map(x=>`<p>${esc(x)}</p>`).join('')}</details>`:'');
+{const k=$('#ctrl');k.style.display=k.innerHTML.trim()?'':'none'}
+if(R==='gm'||R==='mesa'){
+ $('#opts').innerHTML=`<div class="seg"><button class="btn" data-a="view" data-v="gm" aria-pressed="${VIEW==='gm'}">Visão do mestre</button><button class="btn" data-a="view" data-v="mesa" aria-pressed="${VIEW==='mesa'}">Visão da mesa</button></div>
+${R==='gm'?`<label class="chk"><input type="checkbox" data-f="sig" ${S.sigilo?'checked':''}> Cartas em sigilo (cada um vê só as suas; o mestre libera)</label>
+<label class="chk"><input type="checkbox" data-f="banca" ${S.banca?'checked':''}> Banca ativa (jogadores contra a banca)</label><label class="chk"><input type="checkbox" data-f="auto" ${S.auto?'checked':''}> Reiniciar sozinho após cada rodada</label><label class="chk">Senha da mesa <input type="text" data-f="pass" value="${esc(S.passw||'')}" placeholder="sem senha" maxlength="40" style="width:130px"></label><label class="chk">Nome da moeda <input type="text" data-f="coin" value="${esc(S.coin)}" maxlength="16" style="width:130px"></label><label class="chk">Limite da mesa (21 é o padrão) <input type="number" data-f="max" min="10" max="99" value="${S.max}" style="width:80px"></label>
+${S.banca?`<label class="chk">Quem conduz a banca <select data-f="cru"><option value="">Mestre</option>${P.map(p=>`<option value="${p.id}"${p.id===S.cru?' selected':''}>${esc(p.name)}</option>`).join('')}</select></label>`:''}`:''}`}
+if(R==='gm'||R==='mesa'){const lk=$('#lk');if(lk)lk.innerHTML=link?`<p style="font-size:13px;margin-bottom:4px">Código da mesa: <b>${esc(code)}</b>${S.passw?' (com senha)':' (pública)'}. Link para jogadores e audiência. Mantenha esta aba aberta: ela é a mesa.</p><p class=\"mute\" style=\"font-size:13px;margin:0 0 4px\">Online: ${conns.filter(c=>c.open&&c.role==='player').length} jogadores, ${conns.filter(c=>c.open&&c.role==='audience').length} na audiência.</p><div class="row" style="margin-top:0"><input type="text" readonly value="${esc(link)}" aria-label="Link para os jogadores" style="flex:1"><button class="btn" data-a="copylink">Copiar link</button></div>`:'<p class="mute" style="font-size:13px">Conectando ao servidor da sessão…</p>'}
+const L2=LOGX?S.log:S.log.slice(0,6);$('#lx').textContent=LOGX?'Ver menos':'Ver mais';$('#log').style.maxHeight=LOGX?'300px':'none';
+$('#log').innerHTML=L2.map(l=>`<p>${esc(l)}</p>`).join('')||'<p>Nada aconteceu ainda.</p>';
+}
+
+/* ---- regras (só o mestre executa) ---- */
+const addP=(name,u,npc)=>S.players.push({id:'p'+Date.now()+Math.random().toString(36).slice(2,6),uid:u||null,npc:!!npc,name,chips:100,claim:null,bet:10,cards:[],st:'wait',res:'',note:'',out:false,show:false,cheat:0});
+function deal(){const A=S.players.filter(p=>!p.out);if(!A.length)return;
+ S.players.forEach(p=>{p.cards=p.out?[]:[d10(),d10()];p.st=p.out?'wait':'play';p.res='';p.show=false});
+ S.dealer={cards:S.banca?[d10(),d10()]:[],st:S.banca?'play':'wait'};
+ const stOf=x=>{const s=sum(x.cards);return s>S.max?'bust':s===S.max?'21':'play'};
+ S.players.forEach(p=>{if(!p.out)p.st=stOf(p)});if(S.banca)S.dealer.st=stOf(S.dealer);
+ S.phase='turn';S.turn=S.players.findIndex(p=>p.st==='play');
+ lg(S.banca?'Nova mão: 2d10 para cada jogador e para a banca.':'Nova mão: 2d10 para cada jogador.');
+ if(S.turn<0){S.turn=0;next()}}
+function again(){S.players.forEach(p=>{p.cards=[];p.st='wait';p.res='';p.show=false;p.item='';p.steal=null});S.dealer={cards:[],st:'wait'};S.phase='setup';lg('Rodada encerrada. Façam suas apostas.')}
+function fix(x){const s=sum(x.cards);x.st=s>S.max?'bust':s===S.max?'21':(x.st==='bust'||x.st==='21'?'play':x.st);adv()}
+function adv(){
+ if(S.phase==='turn'){const c=S.players[S.turn];if(!c||c.st!=='play')next()}
+ else if(S.phase==='dealer'&&S.dealer.st!=='play')reveal()}
+function next(){
+ if(S.phase==='turn'){const n=S.players.length;
+  for(let k=1;k<=n;k++){const i=(S.turn+k)%n;if(S.players[i].st==='play'){S.turn=i;return}}
+  if(!S.banca||S.players.filter(p=>!p.out&&p.cards.length).every(p=>p.st==='bust'))return reveal();
+  S.phase='dealer';lg('Todos jogaram. Agora é a vez da banca.');if(S.dealer.st!=='play')reveal()}
+ else reveal()}
+function hit(v){if(!['turn','dealer'].includes(S.phase))return;
+ const D=S.phase==='dealer',x=D?S.dealer:S.players[S.turn];if(!x)return;const nm=D?'A banca':x.name;
+ x.cards.push(v||d10());lg(`${nm} pediu uma carta.`);const s=sum(x.cards);
+ if(s>=S.max)lg(S.sigilo?`${nm} terminou a jogada.`:(s>S.max?`${nm} estourou com ${s}.`:`${nm} fez ${S.max}!`));
+ fix(x)}
+function stand(){if(!['turn','dealer'].includes(S.phase))return;
+ const D=S.phase==='dealer',x=D?S.dealer:S.players[S.turn];if(!x)return;
+ x.st='stand';lg(`${D?'A banca':x.name} parou.`);adv()}
+function give(t,v){const x=tg(t);if(!x||x.out||!['turn','dealer'].includes(S.phase))return msg('Só durante a rodada.');
+ x.cards.push(v||d10());lg(`${t==='d'?'A banca':x.name} recebeu uma carta.`);fix(x)}
+function take(t){const x=tg(t);if(!x||!x.cards.length||!['turn','dealer'].includes(S.phase))return msg('Nada para tirar agora.');
+ x.cards.pop();lg(`${t==='d'?'A banca':x.name} perdeu a última carta.`);fix(x)}
+function raise(i,v,item){const p=S.players[i];v=Math.floor(v)||0;item=String(item||'').trim().slice(0,60);if(!p||p.out||!(v>0||item))return;
+ if(v>0)p.bet+=v;if(item)p.item=item;
+ lg(`${p.name} aumentou a aposta${v>0?` para ${p.bet}`:''}${item?` e colocou na mesa: ${item}`:''}.`)}
+function pay(p,d){p.chips+=d;if(p.claim!=null)p.claim+=d;
+ if(p.chips<0){lg(`${p.name} perdeu mais do que tinha: o blefe foi descoberto!`);p.chips=0;p.claim=null}
+ else if(p.claim!=null&&p.claim<0)p.claim=0}
+function reveal(){
+ S.phase='reveal';const A=S.players.filter(p=>!p.out&&p.cards.length),tx=p=>`${p.name} fez ${sum(p.cards)}${p.st==='bust'?' e estourou':''}`;
+ if(S.banca){const dt=sum(S.dealer.cards),db=dt>S.max;lg(`A banca revela ${dt}${db?' e estourou':''}.`);
+  A.forEach(p=>{const t=sum(p.cards),b=+p.bet||0;let r;
+   if(p.st==='bust')r='lose';else if(db||t>dt)r='win';else if(t===dt)r='push';else r='lose';
+   p.res=r;pay(p,r==='win'?b:r==='lose'?-b:0);
+   lg(`${tx(p)}: ${r==='win'?'ganha '+b:r==='lose'?'perde '+b:'empate'}.`)})}
+ else{const ok=A.filter(p=>p.st!=='bust'),best=Math.max(0,...ok.map(p=>sum(p.cards))),w=ok.filter(p=>sum(p.cards)===best),pot=A.reduce((s,p)=>s+p.bet,0);
+  A.forEach(p=>{p.res=!w.length?'push':w.includes(p)?'win':'lose';
+   if(w.length)pay(p,(w.includes(p)?Math.floor(pot/w.length):0)-p.bet);
+   lg(`${tx(p)}.`)});
+  lg(w.length?`Leva o pote de ${pot}: ${w.map(p=>p.name).join(', ')}.`:'Todos estouraram. As apostas voltam.')}}
+function proc(by,r){
+ const i=S.players.findIndex(p=>p.uid===by),p=S.players[i];
+ if(r.a==='join'){if(!p)addP(String(r.name||'Jogador').slice(0,24),by);return}
+ if(S.phase==='over')return;
+ if(!p)return;
+ if(r.a==='rename'){const n=String(r.name||'').trim().slice(0,24);if(n)p.name=n;return}
+ const mine=S.phase==='turn'&&S.turn===i;
+ if(r.a==='hit'&&mine)hit();else if(r.a==='stand'&&mine)stand();
+ else if(r.a==='raise'&&(S.phase==='setup'||mine))raise(i,+r.v,r.item);
+ else if(r.a==='steal'&&!p.out&&!p.steal&&p.cards.length&&['turn','dealer'].includes(S.phase)){p.steal={st:'ask'};sec(`${p.name} quer roubar.`)}
+ else if(r.a==='d20'&&p.steal&&p.steal.st==='dc'){const v=Math.floor(+r.v);if(v>=1&&v<=20){p.steal={st:'roll',dc:p.steal.dc,d20:v};sec(`${p.name} tirou ${v} no d20.`)}}
+ else if(S.cru===p.id&&S.phase==='dealer'){if(r.a==='dhit')hit();if(r.a==='dstand')stand()}}
+
+/* ---- trapaça e fim de jogo ---- */
+function boost(i){const p=S.players[i];if(!p||!['turn','dealer'].includes(S.phase))return msg('Só durante a rodada.');
+ const L=S.max,s=sum(p.cards);if(s>=L)return msg('Ele já está no limite.');
+ const lo=Math.max(s+1,L-1),alvo=lo+Math.floor(Math.random()*(L-lo+1));let r=alvo-s;
+ while(r>0){const v=Math.min(10,r);p.cards.push(v);r-=v}
+ lg(`${p.name} pediu uma carta.`);fix(p);if(p.st==='play'){p.st='stand';adv()}}
+function stealOp(i,op,dc){const p=S.players[i];if(!p||!p.steal)return;const s=p.steal;
+ if(op==='dc'&&s.st==='ask'){p.steal={st:'dc',dc:Math.min(30,Math.max(1,Math.floor(dc)||12))};sec(`${p.name}: desafio definido (CD ${p.steal.dc}).`)}
+ else if(op==='ok'&&s.st==='roll'){sec(`${p.name} roubou com sucesso (d20 ${s.d20}, CD ${s.dc}).`);p.cheat=(p.cheat||0)+1;p.steal=null;boost(i)}
+ else if(op==='fail'&&s.st==='roll'){sec(`${p.name} falhou ao roubar (d20 ${s.d20}, CD ${s.dc}).`);p.steal=null}
+ else if(op==='no'){p.steal=null}
+ else if(op==='catch'){sec(`${p.name} foi pego roubando.`);p.steal=null;S.acc=p.id;lg(`${p.name} foi acusado de trapaça. Justifique-se!`)}}
+function endGame(){const p=S.players.find(p=>p.id===S.acc);S.phase='over';S.over=`${p?p.name:'Alguém'} foi pego trapaceando e não conseguiu se justificar. Fim de jogo.`;S.acc='';lg(S.over)}
+function newGame(){S.players.forEach(p=>{p.cards=[];p.st='wait';p.res='';p.show=false;p.cheat=0;p.item='';p.steal=null});S.dealer={cards:[],st:'wait'};S.phase='setup';S.over='';S.acc='';S.secret=[];lg('Nova partida. Façam suas apostas.')}
+
+/* ---- sincronização ---- */
+/* ---- rede: o navegador do mestre é o servidor (PeerJS/WebRTC) ---- */
+const LS=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}};
+const pid=LS('mesaPid')||(()=>{const x='u'+Math.random().toString(36).slice(2,10)+Date.now().toString(36);LS('mesaPid',x);return x})();
+let conns=[],peer=null,hostConn=null,link='',tries=0,G=0;
+const rid=()=>Math.random().toString(36).slice(2,8);
+function viewFor(c){
+ const v=JSON.parse(JSON.stringify(S)),rv=v.phase==='reveal',open=!v.sigilo,cp=S.players.find(p=>p.id===S.cru),cr=!!cp&&cp.uid===c.pid,aud=c.role!=='player',z=x=>{x.cards=x.cards.map((k,i)=>aud&&i===0?k:0)};
+ delete v.seen;delete v.passw;v.secret=[];
+ v.players.forEach(p=>{const me=c.role==='player'&&p.uid===c.pid;
+  if(!(rv||open||p.show||me))z(p);
+  delete p.note;delete p.cheat;if(!me)delete p.steal;else if(p.steal)p.steal={st:p.steal.st};
+  p.uid=p.uid?(me?'me':'x'):null});
+ const d=v.dealer;if(!(rv||d.show||cr||(open&&v.phase==='dealer')))d.cards=d.cards.map((x,i)=>(open&&i!==1)||(aud&&i===0)?x:0);
+ return{t:'state',S:v}}
+function send1(c){if(c.open&&c.pid)try{c.send(viewFor(c))}catch(e){}}
+function commit(){S.log=S.log.slice(0,40);render();
+ if(isGM){LS('mesaState:'+code,JSON.stringify(S));conns.forEach(send1)}
+ clearTimeout(timer);timer=null;
+ if(isGM&&S.phase==='reveal'&&S.auto)timer=setTimeout(()=>{if(S.phase==='reveal'&&S.auto){again();commit()}},15000)}
+const rq=(a,o)=>{if(!hostConn||!hostConn.open)return msg('Sem conexão com o mestre. Aguarde ou recarregue a página.');hostConn.send({t:'req',pid,r:Object.assign({a},o)})};
+function enter(){ready=true;$('#tabs').style.display='';show()}
+function startHost(){
+ const g=++G;try{if(peer)peer.destroy()}catch(e){}
+ peer=new Peer(HID);
+ peer.on('open',()=>{if(g!==G)return;link=location.origin+location.pathname+'?sala='+code;
+  if(!ready){isGM=true;MYROLE='gm';
+   if(!MYFRESH){try{const s=JSON.parse(LS('mesaState:'+code));if(s&&s.players)S=Object.assign(S,s)}catch(e){}}
+   S.passw=MYPW;loaded=true;enter();commit()}else render()});
+ peer.on('disconnected',()=>{if(g===G)try{peer.reconnect()}catch(e){}});
+ peer.on('error',e=>{if(g!==G)return;
+  if(e.type==='unavailable-id'){if(tries++<3){msg('Verificando o código…');setTimeout(()=>{if(g===G)startHost()},2000)}else{MYROLE='';msg('Esse código já está em uso. Escolha outro.')}}
+  else if(e.type!=='peer-unavailable')msg('Conexão: '+e.type)});
+ peer.on('connection',c=>{
+  c.on('data',m=>{if(!m||g!==G)return;
+   const bad=!!S.passw&&m.pass!==S.passw;
+   if(m.t==='check'){try{c.send({t:bad?'deny':'ok'})}catch(e){}return}
+   if(m.t==='hello'&&m.pid){
+    if(bad){try{c.send({t:'deny'})}catch(e){}setTimeout(()=>{try{c.close()}catch(e){}},300);return}
+    c.pid=m.pid;c.role=m.role==='player'?'player':'audience';if(!conns.includes(c))conns.push(c);
+    if(c.role==='player'&&!S.players.some(p=>p.uid===m.pid))addP(String(m.name||'Jogador').slice(0,24),m.pid);
+    commit()}
+   else if(m.t==='req'&&c.pid){proc(c.pid,m.r);commit()}});
+  c.on('close',()=>{conns=conns.filter(x=>x!==c);if(g===G)render()});
+  c.on('error',()=>{})})}
+function startPlayer(){
+ const g=++G;try{if(peer)peer.destroy()}catch(e){}
+ const retry=()=>{if(g!==G)return;loaded=false;render();setTimeout(()=>{if(g===G)startPlayer()},3000)};
+ peer=new Peer();
+ peer.on('open',()=>{if(g!==G)return;hostConn=peer.connect(HID,{reliable:true});
+  hostConn.on('open',()=>hostConn.send({t:'hello',pid,role:MYROLE,name:MYNAME,pass:MYPW}));
+  hostConn.on('data',m=>{if(g!==G||!m)return;
+   if(m.t==='state'){S=m.S;loaded=true;render()}
+   else if(m.t==='deny'){G++;try{peer.destroy()}catch(e){}ready=false;MYROLE='';showL('join');msg('Senha incorreta.')}});
+  hostConn.on('close',retry)});
+ peer.on('error',e=>{if(e.type==='peer-unavailable')retry()})}
+/* ---- telas de entrada ---- */
+const clean=s=>String(s||'').toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,20);
+const HP='apostasd20-';
+function showL(s){
+ $('#tabs').style.display='none';
+ const back='<div class="row"><button class="btn" data-a="L" data-i="menu">Voltar</button></div>';
+ const T={
+ menu:`<h2>ApostasD20</h2><p class="mute">Mesas de apostas para jogar com o seu grupo, online.</p><div class="row"><button class="btn pri" data-a="L" data-i="mk">Criar mesa</button><button class="btn" data-a="L" data-i="join">Ingressar numa mesa</button></div>`,
+ mk:`<h2>Criar mesa</h2><p>Você será o mestre. Defina o código da sala e, se quiser uma mesa privada, uma senha.</p>
+<div class="row"><label class="lab">Código da sala <input id="mc" value="${esc(LS('mesaCode')||rid())}" maxlength="20" autocomplete="off"></label></div>
+<div class="row"><label class="lab">Senha (opcional, deixe vazio para mesa pública) <input id="mp" type="password" maxlength="40" autocomplete="off"></label></div>
+<label class="chk"><input type="checkbox" id="mf"> Começar do zero (apaga a mesa salva com esse código neste navegador)</label>
+<div class="row"><button class="btn pri" data-a="L" data-i="create">Criar mesa</button></div>${back}`,
+ join:`<h2>Ingressar numa mesa</h2><p>Digite o código que o mestre passou. Se a mesa for privada, digite também a senha.</p>
+<div class="row"><label class="lab">Código da sala <input id="jc" value="${esc(code)}" maxlength="20" autocomplete="off"></label></div>
+<div class="row"><label class="lab">Senha (se houver) <input id="jp" type="password" maxlength="40" autocomplete="off"></label></div>
+<div class="row"><button class="btn pri" id="jb" data-a="L" data-i="check">Continuar</button></div>${back}`,
+ who:`<h2>Mesa ${esc(code)}</h2><p>Como você quer participar?</p>
+<div class="row"><input id="pn" placeholder="Nome do seu personagem" aria-label="Nome do seu personagem" maxlength="24"><button class="btn pri" data-a="L" data-i="player">Entrar como jogador</button></div>
+<div class="row"><button class="btn" data-a="L" data-i="audience">Só assistir (audiência)</button></div>${back}`};
+ $('#game').innerHTML=`<div class="panel" style="max-width:520px;margin:20px auto">${T[s]}<p style="margin-top:10px"><span id="msg" role="status"></span></p></div>`;
+ if(!window.Peer)msg('Não foi possível carregar a conexão online. Recarregue a página.')}
+function create(){
+ const cd=clean($('#mc').value),pw=($('#mp').value||'').trim(),fresh=$('#mf').checked;
+ if(cd.length<3)return msg('O código precisa ter pelo menos 3 letras ou números.');
+ code=cd;HID=HP+code;MYPW=pw;MYFRESH=fresh;LS('mesaCode',code);if(fresh)LS('mesaState:'+code,'');
+ MYROLE='gm';tries=0;msg('Criando a mesa…');startHost()}
+function checkMesa(){
+ const cd=clean($('#jc').value),pw=($('#jp').value||'').trim(),NF='Mesa não encontrada. Confira o código ou espere o mestre criar a mesa.';
+ if(cd.length<3)return msg('Digite o código da mesa.');
+ code=cd;HID=HP+code;MYPW=pw;msg('Procurando a mesa…');
+ const b=$('#jb');b.disabled=true;let done=false;const pp=new Peer();
+ const fin=(ok,t)=>{if(done)return;done=true;clearTimeout(to);try{pp.destroy()}catch(e){}if(ok)showL('who');else{msg(t);b.disabled=false}};
+ const to=setTimeout(()=>fin(false,NF),9000);
+ pp.on('open',()=>{const c=pp.connect(HID,{reliable:true});
+  c.on('open',()=>c.send({t:'check',pass:pw}));
+  c.on('data',m=>fin(!!m&&m.t==='ok','Senha incorreta.'))});
+ pp.on('error',e=>fin(false,e.type==='peer-unavailable'?NF:'Falha de conexão: '+e.type))}
+function pickRole(r){
+ const n=($('#pn').value||'').trim();
+ if(r==='player'&&!n)return msg('Digite o nome do seu personagem para entrar.');
+ MYROLE=r;MYNAME=n;isGM=false;uid='me';enter();startPlayer()}
+function L(i){
+ if(i==='menu'||i==='mk'||i==='join')return showL(i);
+ if(i==='create')return create();
+ if(i==='check')return checkMesa();
+ pickRole(i)}
+function init(){
+ const q=new URLSearchParams(location.search),c0=clean(q.get('sala')||(location.hash.match(/sala=([a-z0-9]+)/i)||[])[1]||'');
+ if(c0){code=c0;HID=HP+code;showL('join')}else showL('menu')}
+
+document.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b)return;const a=b.dataset.a,i=b.dataset.i;
+ if(a==='L'){L(i);return}
+ if(a==='tab'){TAB=i;show();return}
+ if(a==='view'){VIEW=b.dataset.v;render();return}
+ if(a==='copylink'){navigator.clipboard.writeText(link).then(()=>msg('Link copiado.'),()=>msg('Selecione e copie o link.'));return}
+ if(a==='logx'){LOGX=!LOGX;render();return}
+ if(a==='peek'){PEEK=true;render();clearTimeout(pt);pt=setTimeout(()=>{PEEK=false;render()},4000);return}
+ if(a==='copy'){navigator.clipboard.writeText(S.log.slice(0,12).reverse().join('\n')).then(()=>msg('Copiado. Cole no chat do Roll20.'),()=>msg('Não foi possível copiar. Selecione o texto do diário.'));return}
+ if(!isGM){
+  if(a==='join')rq('join',{name:($('#jn').value.trim()||'Jogador')});
+  else if(a==='raise')rq('raise',{v:+$('#rv').value,item:($('#ri').value||'').trim()});
+  else if(a==='steal')rq('steal');
+  else if(a==='d20')rq('d20',{v:+$('#d20').value});
+  else if(a==='rename')rq('rename',{name:$('#nm').value.trim()});
+  else if(['hit','stand','dhit','dstand'].includes(a))rq(a);
+  return}
+ const t=i==='d'?'d':+i,g=n=>{const el=document.querySelector(`[data-s="${n}"]`);return el?+el.value||0:0};
+ if(a==='deal')deal();else if(a==='hit')hit();else if(a==='stand')stand();else if(a==='again')again();
+ else if(a==='manual'){const v=+$('#mv').value;if(Number.isInteger(v)&&v>=1&&v<=10)hit(v);else return msg('Informe um valor de 1 a 10.')}
+ else if(a==='del'){if(S.players[t].id===S.cru)S.cru='';S.players.splice(t,1)}
+ else if(a==='turn')S.turn=t;
+ else if(a==='give')give(t,g('g'+t));
+ else if(a==='take')take(t);
+ else if(a==='show')tg(t).show=!tg(t).show;
+ else if(a==='raise')raise(t,g('r'+t));
+ else if(a==='sdc')stealOp(t,'dc',+(document.querySelector('[data-s="dc'+t+'"]')||{}).value);else if(a==='sno')stealOp(t,'no');else if(a==='sok')stealOp(t,'ok');else if(a==='sfail')stealOp(t,'fail');else if(a==='scatch')stealOp(t,'catch');
+ else if(a==='clear')S.log=[];
+ else if(a==='acuse'){const p=S.players[t];if(S.acc===p.id)S.acc='';else{S.acc=p.id;lg(`${p.name} foi acusado de trapaça. Justifique-se!`)}}
+ else if(a==='pardon'){const p=S.players.find(p=>p.id===S.acc);S.acc='';if(p)lg(`${p.name} se justificou. O jogo continua.`)}
+ else if(a==='end')endGame();
+ else if(a==='newgame')newGame();
+ else return;
+ commit()});
+document.addEventListener('change',e=>{const t=e.target,f=t.dataset.f,i=+t.dataset.i;if(!isGM||!f)return;
+ const between=S.phase==='setup'||S.phase==='reveal';
+ if(f==='bet')S.players[i].bet=Math.max(1,Math.floor(+t.value)||1);
+ else if(f==='note')S.players[i].note=t.value;
+ else if(f==='chips')S.players[i].chips=Math.max(0,Math.floor(+t.value)||0);
+ else if(f==='claim')S.players[i].claim=t.value===''?null:Math.max(0,Math.floor(+t.value)||0);
+ else if(f==='auto')S.auto=t.checked;
+ else if(f==='pass')S.passw=t.value.trim();
+ else if(f==='coin')S.coin=(t.value.trim()||'Ouro').slice(0,16);
+ else if(f==='max'){if(between)S.max=Math.min(99,Math.max(10,Math.floor(+t.value)||21));else msg('Só dá para mudar o limite entre rodadas.')}
+ else if(f==='dist')S.dist=t.value;
+ else if(f==='sig')S.sigilo=t.checked;
+ else if(f==='banca'||f==='cru'){
+  if(!between)msg('Só dá para mudar entre rodadas.');
+  else{if(f==='banca')S.banca=t.checked;else S.cru=t.value;
+   if(!S.banca)S.cru='';S.players.forEach(p=>{p.out=!!S.cru&&p.id===S.cru})}}
+ commit()});
+document.addEventListener('submit',e=>{e.preventDefault();const f=e.target;if(f.id!=='add'||!isGM)return;
+ const n=f.n.value.trim();if(!n)return;
+ addP(n,null,true);f.n.value='';commit()});
+init();
+})();
+</script>
+</body>
+</html>
